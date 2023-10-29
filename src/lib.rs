@@ -6,6 +6,7 @@ use rusqlite::{params, Connection, Result};
 use std::error::Error;
 use std::fs::File;
 use serde_derive::Deserialize;
+use rusqlite::params;
 
 #[derive(Debug, Deserialize)]
 struct Flight {
