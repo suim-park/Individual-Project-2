@@ -22,11 +22,11 @@ jobs:
     - name: Check Rust versions
       run: make rust-version
 
-    - name: Update Rust
+    - name: Install Dependencies
       run: make install
 
-    - name: build Rust
-      run: make release
+    - name: Build Rust
+      run: make build
 
     - name: Format the Code
       run: make format
