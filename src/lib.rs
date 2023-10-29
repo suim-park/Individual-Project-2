@@ -13,7 +13,7 @@ struct Flight {
     passengers: u32,
 }
 
-fn read_csv(filename: &str) -> Result<Vec<Flight>, Box<dyn Error>> {
+fn extract(filename: &str) -> Result<Vec<Flight>, Box<dyn Error>> {
     let mut flights = Vec::new();
     let file = File::open(filename)?;
     let mut rdr = csv::Reader::from_reader(file);
@@ -24,7 +24,7 @@ fn read_csv(filename: &str) -> Result<Vec<Flight>, Box<dyn Error>> {
     Ok(flights)
 }
 
-fn save_to_db(conn: &Connection, flights: &[Flight]) -> Result<(), rusqlite::Error> {
+fn load(conn: &Connection, flights: &[Flight]) -> Result<(), rusqlite::Error> {
     for flight in flights {
         conn.execute(
             "INSERT INTO flights (year, month, passengers) VALUES (?1, ?2, ?3)",
@@ -34,16 +34,3 @@ fn save_to_db(conn: &Connection, flights: &[Flight]) -> Result<(), rusqlite::Err
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let conn = Connection::open("flights.db")?;
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS flights (year INTEGER, month TEXT, passengers INTEGER)",
-        params![],
-    )?;
-
-    let flights = read_csv("flights.csv")?;
-
-    save_to_db(&conn, &flights)?;
-
-    Ok(())
-}
