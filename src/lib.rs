@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::io::Write;
+use reqwest;
 
-pub fn download_to_csv(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn extract(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     // HTTP 요청을 통해 URL에서 데이터를 가져옵니다.
     let response = reqwest::blocking::get(url)?;
 
