@@ -3,13 +3,13 @@ use std::fs::File;
 use std::io::Write;
 
 pub fn extract(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    // HTTP 요청을 통해 URL에서 데이터를 가져옵니다.
+    // Fetch data from the URL via an HTTP request.
     let response = reqwest::blocking::get(url)?;
 
-    // 가져온 데이터의 내용을 읽습니다.
+    // Read the content of the fetched data.
     let content = response.text()?;
 
-    // 지정된 경로에 파일을 생성하고 내용을 기록합니다.
+    // Create a file at the specified path and write the content.
     let mut file = File::create(file_path)?;
     file.write_all(content.as_bytes())?;
 
@@ -17,21 +17,21 @@ pub fn extract(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Err
 }
 
 pub fn transform(csv_path: &str, db_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    // CSV 파일을 엽니다.
+    // Open the CSV file.
     let mut rdr = csv::Reader::from_path(csv_path)?;
 
-    // SQLite 데이터베이스 파일을 생성하거나 연결합니다.
+    // Create or connect to an SQLite database file.
     let conn = Connection::open(db_path)?;
 
-    // 적절한 테이블을 생성합니다. 이 예제에서는 단순한 구조로 가정합니다.
-    // 실제 사용 사례에 따라 테이블 구조를 조정할 필요가 있을 수 있습니다.
+    // Create the appropriate table. This example assumes a simple structure.
+    // Adjust the table structure according to your actual use case.
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS data (year INTEGER, month TEXT, passengers INTEGER)", // 컬럼 이름과 타입은 실제 CSV 구조에 맞게 조정하세요.
+        "CREATE TABLE IF NOT EXISTS data (year INTEGER, month TEXT, passengers INTEGER)", 
         [],
     )?;
 
     for result in rdr.deserialize() {
-        let (year, month, passengers): (i32, String, i32) = result?; // 타입과 변수는 실제 CSV 구조에 따라 조정하세요.
+        let (year, month, passengers): (i32, String, i32) = result?;
         conn.execute(
             "INSERT INTO data (year, month, passengers) VALUES (?1, ?2, ?3)",
             params![year, month, passengers],
@@ -47,10 +47,10 @@ pub fn create(
     month: &str,
     passengers: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // SQLite 데이터베이스 파일에 연결합니다.
+    // Connect to the SQLite database file.
     let conn = rusqlite::Connection::open(db_path)?;
 
-    // 데이터를 `data` 테이블에 삽입합니다.
+    // Insert data into the `data` table.
     conn.execute(
         "INSERT INTO data (year, month, passengers) VALUES (?1, ?2, ?3)",
         params![year, month, passengers],
@@ -62,10 +62,10 @@ pub fn create(
 }
 
 pub fn read(db_path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    // SQLite 데이터베이스 파일에 연결합니다.
+    // Connect to the SQLite database file.
     let conn = rusqlite::Connection::open(db_path)?;
 
-    // 쿼리를 실행하여 결과를 가져옵니다.
+    // Execute the query and fetch the results.
     let mut stmt = conn.prepare("SELECT year, month, passengers FROM data")?;
     let rows = stmt.query_map([], |row| {
         Ok((
@@ -75,7 +75,7 @@ pub fn read(db_path: &str) -> Result<(), Box<dyn std::error::Error>> {
         ))
     })?;
 
-    // 결과를 출력합니다.
+    // Print the results.
     for row_result in rows {
         let (year, month, passengers) = row_result?;
         println!("{} - {}: {}", year, month, passengers);
@@ -90,10 +90,10 @@ pub fn update(
     month: &str,
     passengers: i32,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // SQLite 데이터베이스 파일에 연결합니다.
+    // Connect to the SQLite database file.
     let conn = rusqlite::Connection::open(db_path)?;
 
-    // 지정된 연도와 월에 해당하는 데이터의 승객 수를 변경합니다.
+    // Update the number of passengers for the specified year and month.
     let rows_modified = conn.execute(
         "UPDATE data SET passengers = ?3 WHERE year = ?1 AND month = ?2",
         params![year, month, passengers],
