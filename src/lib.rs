@@ -5,6 +5,7 @@ extern crate serde;
 use rusqlite::{params, Connection, Result};
 use std::error::Error;
 use std::fs::File;
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Flight {

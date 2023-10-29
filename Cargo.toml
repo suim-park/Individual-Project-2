@@ -1,5 +1,5 @@
 [package]
-name = "rust-cli-binary"
+name = "src"
 version = "0.1.0"
 authors = ["Suim Park"]
 edition = "2021"
@@ -10,3 +10,5 @@ edition = "2021"
 rand = "0.8.5"
 csv = "1.3.0"
 serde = "1.0.189"
+serde_derive = "1.0.190"
+rusqlite = "0.29.0"
