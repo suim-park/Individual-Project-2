@@ -23,7 +23,6 @@ fn main() {
         Ok(_) => println!("Successfully inserted data into the SQLite DB."),
         Err(e) => println!("Error occurred while inserting data: {}", e),
     }
-
    
     match read("flightsDB.db") {
         Ok(_) => println!("Successfully read from the SQLite DB."),
