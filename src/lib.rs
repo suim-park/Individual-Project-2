@@ -2,7 +2,7 @@ extern crate rusqlite;
 extern crate csv;
 extern crate serde;
 
-use rusqlite::{params, Connection, Result};
+use rusqlite::Connection;
 use std::error::Error;
 use std::fs::File;
 use serde_derive::Deserialize;
