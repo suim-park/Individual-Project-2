@@ -1,38 +1,19 @@
-extern crate rusqlite;
-extern crate csv;
-extern crate serde;
-
-use rusqlite::Connection;
-use std::error::Error;
 use std::fs::File;
-use serde_derive::Deserialize;
-use rusqlite::params;
+use std::io::Write;
 
-#[derive(Debug, Deserialize)]
-struct Flight {
-    year: u32,
-    month: String,
-    passengers: u32,
-}
+pub fn download_to_csv(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // HTTP 요청을 통해 URL에서 데이터를 가져옵니다.
+    let response = reqwest::blocking::get(url)?;
 
-fn extract(filename: &str) -> Result<Vec<Flight>, Box<dyn Error>> {
-    let mut flights = Vec::new();
-    let file = File::open(filename)?;
-    let mut rdr = csv::Reader::from_reader(file);
-    for result in rdr.deserialize() {
-        let flight: Flight = result?;
-        flights.push(flight);
-    }
-    Ok(flights)
-}
+    // 가져온 데이터의 내용을 읽습니다.
+    let content = response.text()?;
 
-fn load(conn: &Connection, flights: &[Flight]) -> Result<(), rusqlite::Error> {
-    for flight in flights {
-        conn.execute(
-            "INSERT INTO flights (year, month, passengers) VALUES (?1, ?2, ?3)",
-            params![flight.year, flight.month, flight.passengers],
-        )?;
-    }
+    // 지정된 경로에 파일을 생성하고 내용을 기록합니다.
+    let mut file = File::create(file_path)?;
+    file.write_all(content.as_bytes())?;
+
     Ok(())
 }
 
+// 사용 예시:
+// download_to_csv("https://example.com/data.csv", "local_data.csv").unwrap();
