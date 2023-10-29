@@ -1,7 +1,6 @@
+use rusqlite::{params, Connection, Result};
 use std::fs::File;
 use std::io::Write;
-use reqwest;
-use rusqlite::{params, Connection, Result};
 
 pub fn extract(url: &str, file_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     // HTTP 요청을 통해 URL에서 데이터를 가져옵니다.
@@ -31,8 +30,8 @@ pub fn transform(csv_path: &str, db_path: &str) -> Result<(), Box<dyn std::error
         [],
     )?;
 
-    for result  in rdr.deserialize() {
-        let (year, month, passengers): (i32, String, i32) = result?;  // 타입과 변수는 실제 CSV 구조에 따라 조정하세요.
+    for result in rdr.deserialize() {
+        let (year, month, passengers): (i32, String, i32) = result?; // 타입과 변수는 실제 CSV 구조에 따라 조정하세요.
         conn.execute(
             "INSERT INTO data (year, month, passengers) VALUES (?1, ?2, ?3)",
             params![year, month, passengers],
@@ -42,7 +41,12 @@ pub fn transform(csv_path: &str, db_path: &str) -> Result<(), Box<dyn std::error
     Ok(())
 }
 
-pub fn create(db_path: &str, year: i32, month: &str, passengers: i32) -> Result<(), Box<dyn std::error::Error>> {
+pub fn create(
+    db_path: &str,
+    year: i32,
+    month: &str,
+    passengers: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
     // SQLite 데이터베이스 파일에 연결합니다.
     let conn = rusqlite::Connection::open(db_path)?;
 
@@ -80,7 +84,12 @@ pub fn read(db_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn update(db_path: &str, year: i32, month: &str, passengers: i32) -> Result<(), Box<dyn std::error::Error>> {
+pub fn update(
+    db_path: &str,
+    year: i32,
+    month: &str,
+    passengers: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
     // SQLite 데이터베이스 파일에 연결합니다.
     let conn = rusqlite::Connection::open(db_path)?;
 
@@ -102,10 +111,7 @@ pub fn update(db_path: &str, year: i32, month: &str, passengers: i32) -> Result<
 pub fn delete(db_path: &str, year: i32) -> Result<()> {
     let conn = Connection::open(db_path)?;
 
-    conn.execute(
-        "DELETE FROM data WHERE year = ?1",
-        params![year],
-    )?;
+    conn.execute("DELETE FROM data WHERE year = ?1", params![year])?;
 
     Ok(())
 }
