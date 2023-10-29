@@ -1,15 +1,17 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::fs::File;
+    use std::fs;
     use std::io::Write;
-    use rusqlite::Connection;
+    use rusqlite::{Connection, OpenFlags};
+    use rusqlite::params;
+    use rust_cli_binary::{extract,transform,create,read,update,delete};
 
     #[test]
     fn test_extract() {
         // 테스트용 URL과 저장 경로를 정의합니다.
         let test_url = "https://github.com/suim-park/Individual-Project-2/raw/main/flights.csv"; // 이 URL은 예제입니다. 실제로 액세스 가능한 URL로 바꿔주세요.
-        let test_path = "test_flightsDB.csv";
+        let test_path = "test_flights.csv";
 
         // extract 함수를 실행합니다.
         let result = extract(test_url, test_path);
@@ -27,12 +29,7 @@ mod tests {
     #[test]
     fn test_transform() {
         // 샘플 CSV 데이터를 생성합니다.
-        let sample_csv_content = "year,month,passengers\n2023,January,100\n2023,February,150";
         let csv_path = "test_flights.csv";
-        let mut file = File::create(csv_path).unwrap();
-        file.write_all(sample_csv_content.as_bytes()).unwrap();
-
-        // 데이터베이스 경로
         let db_path = "test_flightsDB.db";
 
         // transform 함수를 실행합니다.
@@ -42,7 +39,7 @@ mod tests {
         assert!(result.is_ok(), "Transform function failed with {:?}", result);
 
         // SQLite 데이터베이스에 연결하고 데이터를 검증합니다.
-        let conn = Connection::open(db_path).unwrap();
+        let conn = Connection::open_with_flags(db_path, OpenFlags::SQLITE_OPEN_READ_WRITE).unwrap();
         let mut stmt = conn.prepare("SELECT year, month, passengers FROM data").unwrap();
         let rows: Vec<(i32, String, i32)> = stmt.query_map([], |row| {
             Ok((
@@ -55,10 +52,6 @@ mod tests {
         assert_eq!(rows.len(), 2, "Unexpected number of rows in the database.");
         assert_eq!(rows[0], (2023, "January".to_string(), 100));
         assert_eq!(rows[1], (2023, "February".to_string(), 150));
-
-        // 테스트 후에는 생성된 파일과 데이터베이스를 삭제합니다.
-        std::fs::remove_file(csv_path).unwrap();
-        std::fs::remove_file(db_path).unwrap();
     }
 
     #[test]
@@ -71,7 +64,7 @@ mod tests {
 
         // 생성된 데이터를 검증합니다.
         let conn = Connection::open(db_path).unwrap();
-        let passengers: i32 = conn.query_row("SELECT passengers FROM data WHERE year = 2023 AND month = 'March'", rusqlite::NO_PARAMS, |row| row.get(0)).unwrap();
+        let passengers: i32 = conn.query_row("SELECT passengers FROM test_flightsDB WHERE year = 2023 AND month = 'March'", params![], |row| row.get(0)).unwrap();
         assert_eq!(passengers, 200);
 
         std::fs::remove_file(db_path).unwrap();
@@ -103,7 +96,7 @@ mod tests {
         assert!(result.is_ok(), "Update function failed with {:?}", result);
 
         // 수정된 데이터를 검증합니다.
-        let passengers: i32 = conn.query_row("SELECT passengers FROM data WHERE year = 2023 AND month = 'May'", rusqlite::NO_PARAMS, |row| row.get(0)).unwrap();
+        let passengers: i32 = conn.query_row("SELECT passengers FROM data WHERE year = 2023 AND month = 'May'", params![], |row| row.get(0)).unwrap();
         assert_eq!(passengers, 350);
 
         std::fs::remove_file(db_path).unwrap();
@@ -121,7 +114,7 @@ mod tests {
         assert!(result.is_ok(), "Delete function failed with {:?}", result);
 
         // 데이터가 정상적으로 삭제되었는지 검증합니다.
-        let count: i32 = conn.query_row("SELECT COUNT(*) FROM data WHERE year = 2023", rusqlite::NO_PARAMS, |row| row.get(0)).unwrap();
+        let count: i32 = conn.query_row("SELECT COUNT(*) FROM data WHERE year = 2023", params![], |row| row.get(0)).unwrap();
         assert_eq!(count, 0);
 
         std::fs::remove_file(db_path).unwrap();
