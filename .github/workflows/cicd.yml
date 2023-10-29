@@ -1,0 +1,45 @@
+name: Notebook
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions-rs/toolchain@v1
+      with:
+          toolchain: stable
+          profile: minimal
+          components: clippy, rustfmt
+          override: true
+
+    - name: Check Rust versions
+      run: make rust-version
+
+    - name: Update Rust
+      run: make install
+
+    - name: build Rust
+      run: make release
+
+    - name: Format the Code
+      run: make format
+
+    - name: Make Lint
+      run: make lint
+
+    - name: Make Test
+      run: make test
+
+    - name: Archive Binary
+      uses: actions/upload-artifact@v2
+      
+      with:
+        name: optimized-binary
+        path: target/release/derek_tao_sqlite

@@ -4,8 +4,12 @@ use rust_cli_binary::create;
 use rust_cli_binary::read;
 use rust_cli_binary::update;
 use rust_cli_binary::delete;
+use std::fs;
 
 fn main() {
+    // 데이터베이스 파일 삭제
+    let _ = fs::remove_file("flightsDB.db");
+    
     extract("https://github.com/suim-park/Individual-Project-2/raw/main/flights.csv", "flights.csv").unwrap();
     
     let csv_path = "flights.csv";
