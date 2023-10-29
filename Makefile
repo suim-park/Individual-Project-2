@@ -10,16 +10,22 @@ install:
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 build:
-    cargo build --quiet
+    cd rust-cli-binary && cargo build --quiet
 
 format:
-	cargo fmt --quiet
+	cd rust-cli-binary && cargo fmt --quiet
 
 lint:
-	cargo clippy --quiet
+	cd rust-cli-binary && cargo clippy --quiet
+
+clean:
+	cd rust-cli-binary && cargo clean
+
+run:
+	cd rust-cli-binary && cargo run
 
 test:
-	cargo test --quiet
+	cd rust-cli-binary && cargo test --quiet
 
 run:
 	cargo run
