@@ -78,7 +78,7 @@ pub fn read(db_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     // Print the results.
     for row_result in rows {
         let (year, month, passengers) = row_result?;
-        println!("{} - {}: {}", year, month, passengers);
+        println!("{}, {}, {}", year, month, passengers);
     }
 
     Ok(())
