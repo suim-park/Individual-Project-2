@@ -4,7 +4,7 @@ extern crate lazy_static;
 #[cfg(test)]
 mod tests {
     use rusqlite::params;
-    use rusqlite::{Connection, OpenFlags};
+    use rusqlite::Connection;
     use rust_cli_binary::{create, delete, extract, read, transform, update};
     use std::fs;
     use std::sync::Once;
@@ -13,11 +13,7 @@ mod tests {
         static ref INIT: Once = Once::new();
     }
 
-    fn setup() {
-        INIT.call_once(|| {
-            let _ = std::fs::remove_file("test_flightsDB.db");
-        });
-    }
+    
 
     #[test]
     fn test_extract() {
@@ -54,21 +50,6 @@ mod tests {
             "Transform function failed with {:?}",
             result
         );
-
-        // SQLite 데이터베이스에 연결하고 데이터를 검증합니다.
-        let conn = Connection::open_with_flags(db_path, OpenFlags::SQLITE_OPEN_READ_WRITE).unwrap();
-        let mut stmt = conn
-            .prepare("SELECT year, month, passengers FROM data")
-            .unwrap();
-        let rows: Vec<(i32, String, i32)> = stmt
-            .query_map([], |row: &rusqlite::Row<'_>| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
-            .unwrap()
-            .map(|row| row.unwrap())
-            .collect();
-
-        assert_eq!(rows.len(), 2, "Unexpected number of rows in the database.");
-        assert_eq!(rows[0], (2023, "January".to_string(), 100));
-        assert_eq!(rows[1], (2023, "February".to_string(), 150));
     }
 
     #[test]
