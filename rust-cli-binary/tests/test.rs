@@ -61,7 +61,7 @@ mod tests {
             .prepare("SELECT year, month, passengers FROM data")
             .unwrap();
         let rows: Vec<(i32, String, i32)> = stmt
-            .query_map([], |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
+            .query_map([], |row: &rusqlite::Row<'_>| Ok((row.get(0)?, row.get(1)?, row.get(2)?)))
             .unwrap()
             .map(|row| row.unwrap())
             .collect();
